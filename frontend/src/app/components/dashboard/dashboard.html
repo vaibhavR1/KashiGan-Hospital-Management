@@ -1,0 +1,146 @@
+<div class="dashboard-container">
+  <div class="dashboard-header animate-fade-in">
+    <div>
+      <h1>Hospital Management Dashboard</h1>
+      <p class="subtitle">Welcome back! Here's a summary of today's hospital operations.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="loadDashboardData()">Refresh Data</button>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading dashboard metrics...</p>
+  </div>
+
+  <div *ngIf="!isLoading" class="animate-fade-in">
+    <!-- Stat Grid -->
+    <div class="stats-grid">
+      <div class="stat-card glass-card">
+        <div class="stat-icon patient-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
+        <div class="stat-details">
+          <h3>Total Patients</h3>
+          <p class="stat-number">{{ totalPatients }}</p>
+          <div class="stat-meta">
+            <span class="badge badge-admitted">{{ admittedPatients }} Admitted</span>
+            <span class="badge badge-outpatient">{{ outpatients }} Outpatients</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card glass-card">
+        <div class="stat-icon doctor-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+        </div>
+        <div class="stat-details">
+          <h3>Doctors On Duty</h3>
+          <p class="stat-number">{{ availableDoctors }} <span class="sub-number">/ {{ totalDoctors }}</span></p>
+          <div class="stat-meta">
+            <span class="badge badge-available">Active Doctors</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card glass-card">
+        <div class="stat-icon appointment-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        </div>
+        <div class="stat-details">
+          <h3>Appointments</h3>
+          <p class="stat-number">{{ totalAppointments }}</p>
+          <div class="stat-meta">
+            <span class="badge badge-scheduled">{{ scheduledAppointments }} Scheduled</span>
+            <span class="badge badge-completed">{{ completedAppointments }} Completed</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card glass-card">
+        <div class="stat-icon revenue-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        </div>
+        <div class="stat-details">
+          <h3>Revenue Collected</h3>
+          <p class="stat-number">₹{{ totalRevenue }}</p>
+          <div class="stat-meta">
+            <span class="badge badge-pending">₹{{ pendingBills }} Pending</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="dashboard-content-grid">
+      <!-- Recent Appointments -->
+      <div class="table-section glass-card">
+        <div class="section-title-bar">
+          <h2>Recent Appointments</h2>
+          <a routerLink="/appointments" class="link-btn">View All</a>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Patient Name</th>
+                <th>Doctor</th>
+                <th>Date</th>
+                <th>Time Slot</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let appt of recentAppointments">
+                <td><strong>{{ appt.patientName }}</strong></td>
+                <td>{{ appt.doctorName }}</td>
+                <td>{{ appt.appointmentDate }}</td>
+                <td>{{ appt.timeSlot }}</td>
+                <td>
+                  <span [ngClass]="{
+                    'status-pill status-scheduled': appt.status === 'Scheduled',
+                    'status-pill status-completed': appt.status === 'Completed',
+                    'status-pill status-cancelled': appt.status === 'Cancelled'
+                  }">{{ appt.status }}</span>
+                </td>
+              </tr>
+              <tr *ngIf="recentAppointments.length === 0">
+                <td colspan="5" class="empty-state">No recent appointments found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Quick Shortcuts -->
+      <div class="quick-shortcuts glass-card">
+        <h2>Quick Actions</h2>
+        <p class="shortcut-desc">Frequently used operations for administrators and receptionists.</p>
+        <div class="shortcuts-list">
+          <a routerLink="/patients" class="shortcut-item">
+            <div class="shortcut-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg></div>
+            <div class="shortcut-details">
+              <h4>Register Patient</h4>
+              <p>Admit or add standard patient profiles</p>
+            </div>
+          </a>
+          <a routerLink="/appointments" class="shortcut-item">
+            <div class="shortcut-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
+            <div class="shortcut-details">
+              <h4>Book Appointment</h4>
+              <p>Schedule consultations with available doctors</p>
+            </div>
+          </a>
+          <a routerLink="/billing" class="shortcut-item">
+            <div class="shortcut-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
+            <div class="shortcut-details">
+              <h4>Generate Invoice</h4>
+              <p>Create bills and record patient payments</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

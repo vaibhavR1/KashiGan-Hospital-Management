@@ -1,0 +1,21 @@
+# Maven (Backend)
+backend/target/
+backend/*.jar
+backend/*.war
+
+# Node & Angular (Frontend)
+frontend/node_modules/
+frontend/.angular/
+frontend/dist/
+frontend/.vscode/
+
+# IDEs & System
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
