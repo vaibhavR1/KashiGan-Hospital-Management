@@ -30,6 +30,12 @@ export class DashboardComponent implements OnInit {
   pendingBills = 0;
 
   isLoading = true;
+  loadedSections = {
+    patients: false,
+    doctors: false,
+    appointments: false,
+    billing: false
+  };
 
   constructor(
     private patientService: PatientService,
@@ -44,6 +50,12 @@ export class DashboardComponent implements OnInit {
 
   loadDashboardData(): void {
     this.isLoading = true;
+    this.loadedSections = {
+      patients: false,
+      doctors: false,
+      appointments: false,
+      billing: false
+    };
     
     // Load patients
     this.patientService.getAll().subscribe({
@@ -52,10 +64,12 @@ export class DashboardComponent implements OnInit {
         this.admittedPatients = patients.filter(p => p.admissionStatus === 'Admitted').length;
         this.outpatients = patients.filter(p => p.admissionStatus === 'Outpatient').length;
         this.dischargedPatients = patients.filter(p => p.admissionStatus === 'Discharged').length;
+        this.loadedSections.patients = true;
         this.checkLoadingState();
       },
       error: (err) => {
         console.error('Error loading patients', err);
+        this.loadedSections.patients = true;
         this.checkLoadingState();
       }
     });
@@ -65,10 +79,12 @@ export class DashboardComponent implements OnInit {
       next: (doctors) => {
         this.totalDoctors = doctors.length;
         this.availableDoctors = doctors.filter(d => d.availabilityStatus === 'Available').length;
+        this.loadedSections.doctors = true;
         this.checkLoadingState();
       },
       error: (err) => {
         console.error('Error loading doctors', err);
+        this.loadedSections.doctors = true;
         this.checkLoadingState();
       }
     });
@@ -84,10 +100,12 @@ export class DashboardComponent implements OnInit {
         this.recentAppointments = [...appointments]
           .sort((a, b) => new Date(b.appointmentDate).getTime() - new Date(a.appointmentDate).getTime())
           .slice(0, 5);
+        this.loadedSections.appointments = true;
         this.checkLoadingState();
       },
       error: (err) => {
         console.error('Error loading appointments', err);
+        this.loadedSections.appointments = true;
         this.checkLoadingState();
       }
     });
@@ -101,17 +119,20 @@ export class DashboardComponent implements OnInit {
         this.pendingBills = billings
           .filter(b => b.paymentStatus === 'Pending')
           .reduce((sum, b) => sum + (b.totalAmount || 0), 0);
+        this.loadedSections.billing = true;
         this.checkLoadingState();
       },
       error: (err) => {
         console.error('Error loading billing', err);
+        this.loadedSections.billing = true;
         this.checkLoadingState();
       }
     });
   }
 
   private checkLoadingState(): void {
-    // Basic fallback to end loading
-    this.isLoading = false;
+    if (this.loadedSections.patients && this.loadedSections.doctors && this.loadedSections.appointments && this.loadedSections.billing) {
+      this.isLoading = false;
+    }
   }
 }
